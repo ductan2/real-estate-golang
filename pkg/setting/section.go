@@ -11,6 +11,7 @@ type Config struct {
 type Server struct {
 	Port string `mapstructure:"port"`
 	Mode string `mapstructure:"mode"`
+	FrontendUrl string `mapstructure:"frontend_url"`
 }
 
 type Database struct {

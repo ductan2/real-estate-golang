@@ -11,6 +11,7 @@ import (
 
 type User struct {
 	ID             uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Username       string    `json:"username" gorm:"uniqueIndex;not null"`
 	Email          string    `json:"email" gorm:"uniqueIndex;not null"`
 	Password       string    `json:"-" gorm:"not null"` // "-" means this field won't be included in JSON
 	Role           enum.Role `json:"role" gorm:"type:varchar(20);not null;default:'user'"`
@@ -33,14 +34,16 @@ type UserInfo struct {
 	FirstName *string    `json:"first_name" gorm:"default:null"`
 	LastName  *string    `json:"last_name" gorm:"default:null"`
 	Phone     *string    `json:"phone" gorm:"default:null"`
-	Address   *string    `json:"address" gorm:"default:null"`
-	Country   *string    `json:"country" gorm:"default:null"`
 	City      *string    `json:"city" gorm:"default:null"`
+	Province  *string    `json:"province" gorm:"default:null"`
+	Ward      *string    `json:"ward" gorm:"default:null"`
+	District  *string    `json:"district" gorm:"default:null"`
+	Address   *string    `json:"address" gorm:"default:null"`
 	BirthDate *time.Time `json:"birth_date" gorm:"default:null"`
 	Avatar    *string    `json:"avatar" gorm:"default:null"`
 	Bio       *string    `json:"bio" gorm:"default:null"`
 	Gender    *string    `json:"gender" gorm:"type:varchar(10);default:null"`
-
+	PersonalTaxCode *string `json:"personal_tax_code" gorm:"default:null"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

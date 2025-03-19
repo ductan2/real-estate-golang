@@ -20,17 +20,23 @@ import (
 )
 
 type IUserService interface {
-	Register(email string, password string, ip string, purpose *string) error
+	Register(username string, email string, password string, ip string, purpose *string) error
 	SendOtp(email string) error
 	VerifyOtp(email string, otp int) error
 	Login(email string, password string, ip string) (string, error)
 	GetUserInfo(userId string) *model.User
+	GetUserByEmail(email string) (*model.User, error)
 	Logout(userId string) error
 	UpdateUserInfo(userId string, params vo.UserUpdateInfoRequest) error
 }
 
 type userService struct {
 	userRepo repo.IUserRepository
+}
+
+// GetUserByEmail implements IUserService.
+func (s *userService) GetUserByEmail(email string) (*model.User, error) {
+	return s.userRepo.GetUserByEmail(email)
 }
 
 // UpdateUserInfo implements IUserService.
@@ -50,7 +56,10 @@ func (s *userService) Logout(userId string) error {
 
 // Login implements IUserService.
 func (s *userService) Login(email string, password string, ip string) (string, error) {
-	user := s.userRepo.GetUserByEmail(email)
+	user, err := s.userRepo.GetUserByEmail(email)
+	if err != nil {
+		return "", err
+	}
 	if user == nil {
 		return "", errors.New("user not found")
 	}
@@ -58,7 +67,7 @@ func (s *userService) Login(email string, password string, ip string) (string, e
 	if !crypto.VerifyPassword(password, user.Password, user.UserSalt) {
 		return "", errors.New("password is incorrect")
 	}
-	err := s.userRepo.UpdateUserLogin(email, ip)
+	err = s.userRepo.UpdateUserLogin(email, ip)
 	if err != nil {
 		return "", err
 	}
@@ -109,7 +118,10 @@ func (s *userService) SendOtp(email string) error {
 	if err != nil {
 		return err
 	}
-	user := s.userRepo.GetUserByEmail(email)
+	user, err := s.userRepo.GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
 	if user == nil {
 		return errors.New("user not found")
 	}
@@ -117,10 +129,10 @@ func (s *userService) SendOtp(email string) error {
 	return nil
 }
 
-func (s *userService) Register(email string, password string, ip string, purpose *string) error {
+func (s *userService) Register(username string, email string, password string, ip string, purpose *string) error {
 	salt := crypto.GenerateSalt()
 	hashedPassword := crypto.HashPassword(password, salt)
-	return s.userRepo.CreateUser(email, hashedPassword, ip, salt)
+	return s.userRepo.CreateUser(username, email, hashedPassword, ip, salt)
 }
 func (s *userService) GetUserInfo(userId string) *model.User {
 	return s.userRepo.GetUserById(userId)

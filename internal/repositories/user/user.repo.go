@@ -3,15 +3,16 @@ package repo
 import (
 	"ecommerce/internal/model"
 	"ecommerce/pkg/enum"
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
 )
 
 type IUserRepository interface {
-	CreateUser(email string, password string, ip string, salt string) error
+	CreateUser(username string, email string, password string, ip string, salt string) error
 	VerifyOtp(email string, otp int) error
-	GetUserByEmail(email string) *model.User
+	GetUserByEmail(email string) (*model.User, error)
 	UpdateUserLogin(email string, ip string) error
 	GetUserById(userId string) *model.User
 	UpdateUserLogout(userId string) error
@@ -36,10 +37,16 @@ func (r *userRepository) GetUserById(userId string) *model.User {
 }
 
 // GetUserByEmail implements IUserRepository.
-func (r *userRepository) GetUserByEmail(email string) *model.User {
+func (r *userRepository) GetUserByEmail(email string) (*model.User, error) {
 	var user model.User
-	r.db.Where("email = ?", email).First(&user)
-	return &user
+	err := r.db.First(&user, "email = ?", email).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
 }
 
 // VerifyOtp implements IUserRepository.
@@ -50,9 +57,10 @@ func (r *userRepository) VerifyOtp(email string, otp int) error {
 	}).Error
 }
 
-func (r *userRepository) CreateUser(email string, password string, ip string, salt string) error {
+func (r *userRepository) CreateUser(username string, email string, password string, ip string, salt string) error {
 
 	return r.db.Create(&model.User{
+		Username:    username,
 		Email:       email,
 		Password:    password,
 		Role:        enum.User,

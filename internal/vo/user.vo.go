@@ -7,6 +7,7 @@ type UserLoginRequest struct {
 }
 
 type UserRegisterRequest struct {
+	Username string `json:"username" binding:"required,min=1"`
 	Email   string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 	Purpose  *string `json:"purpose"` // TEST_USER, TRADER, ADMIN, etc.

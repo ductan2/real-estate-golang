@@ -5,6 +5,7 @@ import (
 	services "ecommerce/internal/services/user"
 	"ecommerce/internal/vo"
 	"ecommerce/pkg/response"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,18 +25,27 @@ func (c *UserController) Register(ctx *gin.Context) {
 		response.ErrorResponse(ctx, response.UnprocessableEntity, err.Error())
 		return
 	}
-
+	user, err := c.userService.GetUserByEmail(params.Email)
+	if err != nil {
+		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		return
+	}
+	if user != nil {
+		response.ErrorResponse(ctx, response.BadRequest, "User already exists")
+		return
+	}
 	ip := ctx.ClientIP()
-	err = c.userService.Register(params.Email, params.Password, ip, params.Purpose)
+	err = c.userService.Register(params.Username, params.Email, params.Password, ip, params.Purpose)
 	if err != nil {
 		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
 		return
 	}
-	err = c.userService.SendOtp(params.Email)
-	if err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
-		return
-	}
+	go func(email string) {
+		if err := c.userService.SendOtp(email); err != nil {
+			fmt.Println("Send OTP error:", err)
+		}
+	}(params.Email)
+	
 
 	response.SuccessResponse(ctx, response.Success, "User registered successfully")
 }
