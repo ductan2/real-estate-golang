@@ -24,5 +24,4 @@ func (c *SellerController) ApplyForSeller(ctx *gin.Context) {
 		return
 	}
 	response.SuccessResponse(ctx, response.Success, "Apply for seller successfully")
-	
 }

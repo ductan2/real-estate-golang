@@ -29,18 +29,26 @@ type Listing struct {
 	SubProject SubProject `json:"sub_project" gorm:"foreignKey:SubProjectID"`
 	Title           string    `json:"title"`
     Price           float64   `json:"price"`
+	Unit            string    `json:"unit"` // Unit of the listing
+	PropertyType    string    `json:"property_type"` // Type of the listing
     Area            float64   `json:"area"`       // Area of the listing
     Bedroom         int       `json:"bedroom"`    // Number of bedrooms
     Bathroom        int       `json:"bathroom"`   // Number of bathrooms
     Floor           int       `json:"floor"`      // Floor number in the building
     Direction       string    `json:"direction"`  // Direction of the listing
     IsForRent       bool      `json:"is_for_rent"`// true = for rent, false = for sale
-    LegalStatus     string    `json:"legal_status"` // Legal status of the listing
     FurnitureStatus string    `json:"furniture_status"` // Furniture status of the listing
+    LegalStatus     string    `json:"legal_status"` // Legal status of the listing
     Images          []string  `gorm:"type:jsonb" json:"images"`
+	VideoURL        *string    `json:"video_url" gorm:"default:null"` // Video URL of the listing
     Description     string    `gorm:"type:text" json:"description"`
 	LongDescription string    `gorm:"type:text" json:"long_description"`
 	IsPublished     bool      `json:"is_published" gorm:"default:false"` // true = published, false = not published
+	StartDate       time.Time `json:"start_date"` // Start date of the listing
+	EndDate         time.Time `json:"end_date"` // End date of the listing
+	ListingType     string    `json:"listing_type"` // Type of the listing [diamond, gold, silver, normal]
+	DurationListing int       `json:"duration_listing"` // Duration of the listing in days
+	
 	SellerID        uuid.UUID `json:"seller_id" gorm:"type:uuid;not null"`
 	Seller          Seller    `json:"seller" gorm:"foreignKey:SellerID"`
     CreatedAt       time.Time `json:"created_at"`

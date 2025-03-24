@@ -16,5 +16,4 @@ func (sr *SellerRouter) InitSellerRouter(Router *gin.RouterGroup) {
 	{
 		sellerRouter.POST("apply", sellerController.ApplyForSeller)
 	}
-
 }

@@ -16,6 +16,7 @@ func (us *UserRouter) InitUserRouter(Router *gin.RouterGroup) {
 		userRouter.POST("register", userController.Register)
 		userRouter.POST("verify-otp", userController.VerifyOtp)
 		userRouter.POST("login", userController.Login)
+		userRouter.POST("resend-otp", userController.ResendOtp)
 	}
 	privateRouter := Router.Group("user")
 	privateRouter.Use(middlewares.AuthenMiddleware())
@@ -23,5 +24,6 @@ func (us *UserRouter) InitUserRouter(Router *gin.RouterGroup) {
 		privateRouter.DELETE("logout", userController.Logout)
 		privateRouter.GET("profile", userController.GetUserInfo)
 		privateRouter.PATCH("profile", userController.UpdateUserInfo)
+		privateRouter.PATCH("upload-avatar", userController.UploadAvatar)
 	}
 }

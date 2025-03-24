@@ -9,11 +9,16 @@ import (
 
 
 func InitUserRouterHanlder() (*controllers.UserController, error) {
-
 	iUserRepository := repo.NewUserRepository(global.DB)
 	iUserService := services.NewUserService(iUserRepository)
 	userController := controllers.NewUserController(iUserService)
 	return userController, nil
+}
+
+func InitUserService() (services.IUserService, error) {
+	iUserRepository := repo.NewUserRepository(global.DB)
+	iUserService := services.NewUserService(iUserRepository)
+	return iUserService, nil
 }
 
 func InitSellerRouterHandler() (*controllers.SellerController, error) {
@@ -37,5 +42,3 @@ func InitAdminService() (services.IAdminService, error) {
 	iAdminService := services.NewAdminService(iAdminRepository)
 	return iAdminService, nil
 }
-
-

@@ -18,9 +18,12 @@ type UserVerifyOtpRequest struct {
 	Otp   int    `json:"otp" binding:"required"`
 }
 
+type UserResendOtpRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
 type UserUpdateInfoRequest struct {
-	FirstName *string `json:"first_name"`
-	LastName  *string `json:"last_name"`
+	Username  *string `json:"username"`
 	Phone     *string `json:"phone"`
 	Address   *string `json:"address"`
 	Country   *string `json:"country"`
@@ -28,4 +31,17 @@ type UserUpdateInfoRequest struct {
 	BirthDate *string `json:"birth_date"`
 	Gender    *string `json:"gender"`
 	Bio       *string `json:"bio"`
+	Avatar    *string `json:"avatar"`
+	Province  *string `json:"province"`
+	District  *string `json:"district"`
+	Ward      *string `json:"ward"`
+}
+
+type UserUpdatePasswordRequest struct {
+	OldPassword string `json:"old_password" binding:"required"`
+	NewPassword string `json:"new_password" binding:"required"`
+}
+
+type UserUpdateEmailRequest struct {
+	Email string `json:"email" binding:"required,email"`
 }

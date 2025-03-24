@@ -10,6 +10,7 @@ func Run() *gin.Engine {
 	// Load configuration
 	// initialize database
 	// initialize redis
+	InitEnv()
 	var r *gin.Engine
 	if global.Config.Server.Mode == "dev" {
 		gin.SetMode(gin.DebugMode)
@@ -20,9 +21,10 @@ func Run() *gin.Engine {
 		r = gin.New()
 	}
 	LoadConfig()
+	InitCloudinary()
 	InitDB()
 	InitRedis()
-	cors:=InitCors()
+	cors := InitCors()
 	r.Use(cors)
 	InitRouter(r)
 	// initialize kafka

@@ -19,7 +19,7 @@ type User struct {
 	UserLoginIP    string    `json:"-" gorm:"default:null"`
 	UserLogoutTime time.Time `json:"-" gorm:"default:null"`
 	UserSalt       string    `json:"-" gorm:"default:null"` // user_salt is the salt that will be used to hash the password
-	Verified       bool      `json:"-" gorm:"default:false"`
+	Verified       bool      `json:"verified" gorm:"default:false"`
 	VerifiedAt     time.Time `json:"-" gorm:"default:null"`
 	UserInfo       *UserInfo `json:"user_info" gorm:"foreignKey:UserId"`
 
@@ -31,38 +31,35 @@ type UserInfo struct {
 	ID     uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
 	UserId uuid.UUID `json:"user_id" gorm:"type:uuid;not null;constraint:OnDelete:CASCADE"`
 
-	FirstName *string    `json:"first_name" gorm:"default:null"`
-	LastName  *string    `json:"last_name" gorm:"default:null"`
-	Phone     *string    `json:"phone" gorm:"default:null"`
-	City      *string    `json:"city" gorm:"default:null"`
-	Province  *string    `json:"province" gorm:"default:null"`
-	Ward      *string    `json:"ward" gorm:"default:null"`
-	District  *string    `json:"district" gorm:"default:null"`
-	Address   *string    `json:"address" gorm:"default:null"`
-	BirthDate *time.Time `json:"birth_date" gorm:"default:null"`
-	Avatar    *string    `json:"avatar" gorm:"default:null"`
-	Bio       *string    `json:"bio" gorm:"default:null"`
-	Gender    *string    `json:"gender" gorm:"type:varchar(10);default:null"`
-	PersonalTaxCode *string `json:"personal_tax_code" gorm:"default:null"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Phone           *string    `json:"phone" gorm:"default:null"`
+	Province        *string    `json:"province" gorm:"default:null"`
+	Ward            *string    `json:"ward" gorm:"default:null"`
+	District        *string    `json:"district" gorm:"default:null"`
+	Address         *string    `json:"address" gorm:"default:null"`
+	BirthDate       *time.Time `json:"birth_date" gorm:"default:null"`
+	Avatar          *string    `json:"avatar" gorm:"default:null"`
+	Bio             *string    `json:"bio" gorm:"default:null"`
+	Gender          *string    `json:"gender" gorm:"type:varchar(10);default:null"`
+	PersonalTaxCode *string    `json:"personal_tax_code" gorm:"default:null"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       time.Time  `json:"updated_at"`
 }
 
 type Seller struct {
-	ID           uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	UserId       uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;constraint:OnDelete:CASCADE"`
-	IsVerified   bool       `json:"is_verified" gorm:"default:null"`
-	VerifiedAt   *time.Time `json:"verified_at" gorm:"default:null"`
-	VerifiedBy   *uuid.UUID `json:"verified_by" gorm:"type:uuid;default:null"`
-	VerifiedByUser *User    `json:"verified_by_user" gorm:"foreignKey:VerifiedBy"`
+	ID             uuid.UUID  `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	UserId         uuid.UUID  `json:"user_id" gorm:"type:uuid;not null;constraint:OnDelete:CASCADE"`
+	IsVerified     bool       `json:"is_verified" gorm:"default:null"`
+	VerifiedAt     *time.Time `json:"verified_at" gorm:"default:null"`
+	VerifiedBy     *uuid.UUID `json:"verified_by" gorm:"type:uuid;default:null"`
+	VerifiedByUser *User      `json:"verified_by_user" gorm:"foreignKey:VerifiedBy"`
 
-	BlockedAt *time.Time `json:"blocked_at" gorm:"default:null"`
-	BlockedBy *uuid.UUID `json:"blocked_by" gorm:"type:uuid;default:null"`
-	BlockedByUser *User    `json:"blocked_by_user" gorm:"foreignKey:BlockedBy"`
+	BlockedAt     *time.Time `json:"blocked_at" gorm:"default:null"`
+	BlockedBy     *uuid.UUID `json:"blocked_by" gorm:"type:uuid;default:null"`
+	BlockedByUser *User      `json:"blocked_by_user" gorm:"foreignKey:BlockedBy"`
 	BlockedReason *string    `json:"blocked_reason" gorm:"default:null"`
-	
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
+
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // TableName specifies the table name for the User model

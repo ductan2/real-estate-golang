@@ -32,7 +32,43 @@ func ErrorResponse(c *gin.Context, code int, message string) {
 	if message == "" {
 		message = msg[code]
 	}
-	c.JSON(http.StatusOK, ResponseData{
+
+	// Map error codes to HTTP status codes
+	var httpStatus int
+	switch code {
+	case BadRequest:
+		httpStatus = http.StatusBadRequest
+	case Unauthorized:
+		httpStatus = http.StatusUnauthorized
+	case Forbidden:
+		httpStatus = http.StatusForbidden
+	case NotFound:
+		httpStatus = http.StatusNotFound
+	case MethodNotAllowed:
+		httpStatus = http.StatusMethodNotAllowed
+	case Conflict:
+		httpStatus = http.StatusConflict
+	case RequestTimeout:
+		httpStatus = http.StatusRequestTimeout
+	case UnprocessableEntity:
+		httpStatus = http.StatusUnprocessableEntity
+	case TooManyRequests:
+		httpStatus = http.StatusTooManyRequests
+	case InternalServerError:
+		httpStatus = http.StatusInternalServerError
+	case NotImplemented:
+		httpStatus = http.StatusNotImplemented
+	case BadGateway:
+		httpStatus = http.StatusBadGateway
+	case ServiceUnavailable:
+		httpStatus = http.StatusServiceUnavailable
+	case GatewayTimeout:
+		httpStatus = http.StatusGatewayTimeout
+	default:
+		httpStatus = http.StatusInternalServerError
+	}
+
+	c.JSON(httpStatus, ResponseData{
 		Code:    code,
 		Message: message,
 		Data:    nil,

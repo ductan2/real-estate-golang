@@ -22,7 +22,7 @@ type adminRepository struct {
 
 // CreateAdmin implements IAdminRepository.
 func (a *adminRepository) CreateAdmin(userId uuid.UUID) error {
-	return a.db.Model(&model.User{}).Where("id = ?", userId).Update("role", enum.Admin).Error
+	return a.db.Model(&model.User{}).Where("id = ?", userId).Update("role", enum.UserRole.Admin).Error
 }
 
 // ApproveSellerRequest implements IAdminRepository.
@@ -37,8 +37,8 @@ func (a *adminRepository) ApproveSellerRequest(userId uuid.UUID, sellerId string
 // BlockSeller implements IAdminRepository.
 func (a *adminRepository) BlockSeller(userId uuid.UUID, sellerId string, reason string) error {
 	return a.db.Model(&model.Seller{}).Where("id = ?", sellerId).Updates(map[string]interface{}{
-		"blocked_at": time.Now(),
-		"blocked_by": &userId,
+		"blocked_at":     time.Now(),
+		"blocked_by":     &userId,
 		"blocked_reason": reason,
 	}).Error
 }
@@ -52,5 +52,5 @@ func (a *adminRepository) CheckAdmin(userId uuid.UUID) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return user.Role == enum.Admin, nil
+	return user.Role == enum.UserRole.Admin, nil
 }

@@ -28,6 +28,7 @@ type IUserService interface {
 	GetUserByEmail(email string) (*model.User, error)
 	Logout(userId string) error
 	UpdateUserInfo(userId string, params vo.UserUpdateInfoRequest) error
+	UpdateUserAvatar(userId string, avatarUrl string) error
 }
 
 type userService struct {
@@ -60,7 +61,7 @@ func (s *userService) Login(email string, password string, ip string) (string, e
 	if err != nil {
 		return "", err
 	}
-	if user == nil {
+	if user == nil || !user.Verified {
 		return "", errors.New("user not found")
 	}
 
@@ -136,6 +137,10 @@ func (s *userService) Register(username string, email string, password string, i
 }
 func (s *userService) GetUserInfo(userId string) *model.User {
 	return s.userRepo.GetUserById(userId)
+}
+
+func (s *userService) UpdateUserAvatar(userId string, avatarUrl string) error {
+	return s.userRepo.UpdateUserAvatar(userId, avatarUrl)
 }
 
 func NewUserService(userRepo repo.IUserRepository) IUserService {

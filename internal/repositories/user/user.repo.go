@@ -17,6 +17,7 @@ type IUserRepository interface {
 	GetUserById(userId string) *model.User
 	UpdateUserLogout(userId string) error
 	UpdateUserInfo(userId string, userInfo map[string]interface{}) error
+	UpdateUserAvatar(userId string, avatarUrl string) error
 }
 
 type userRepository struct {
@@ -26,6 +27,11 @@ type userRepository struct {
 // UpdateUserInfo implements IUserRepository.
 func (r *userRepository) UpdateUserInfo(userId string, userInfo map[string]interface{}) error {
 	// Only update fields that are provided in the userInfo map
+	if userInfo["username"] != nil {
+		r.db.Model(&model.User{}).Where("id = ?", userId).Update("username", userInfo["username"])
+	}
+	// remove username from userInfo
+	delete(userInfo, "username")
 	return r.db.Model(&model.UserInfo{}).Where("user_id = ?", userId).Updates(userInfo).Error
 }
 
@@ -63,7 +69,7 @@ func (r *userRepository) CreateUser(username string, email string, password stri
 		Username:    username,
 		Email:       email,
 		Password:    password,
-		Role:        enum.User,
+		Role:        enum.UserRole.User,
 		UserSalt:    salt,
 		UserLoginIP: ip,
 	}).Error
@@ -80,6 +86,10 @@ func (r *userRepository) UpdateUserLogout(userId string) error {
 	return r.db.Model(&model.User{}).Where("id = ?", userId).
 		Update("user_logout_time", time.Now()).
 		Error
+}
+
+func (s *userRepository) UpdateUserAvatar(userId string, avatarUrl string) error {
+	return s.db.Model(&model.UserInfo{}).Where("user_id = ?", userId).Update("avatar", avatarUrl).Error
 }
 
 func NewUserRepository(db *gorm.DB) IUserRepository {

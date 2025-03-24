@@ -1,7 +1,7 @@
 package initialize
 
 import (
-	"ecommerce/internal/middleware"
+	"ecommerce/internal/middlewares"
 	"ecommerce/internal/routers"
 
 	"github.com/gin-gonic/gin"
@@ -9,7 +9,7 @@ import (
 
 func InitRouter(r *gin.Engine) {
 	// Add logger middleware
-	r.Use(middleware.Logger())
+	r.Use(middlewares.Logger())
 
 	userRouter := routers.RouterGroupApp
 	MainGroup := r.Group("/api/v1")
@@ -23,5 +23,7 @@ func InitRouter(r *gin.Engine) {
 	{
 		userRouter.User.InitUserRouter(MainGroup)
 		userRouter.Seller.InitSellerRouter(MainGroup)
+		userRouter.Admin.InitAdminRouter(MainGroup)
+		userRouter.Investor.InitInvestorRouter(MainGroup)
 	}
 }

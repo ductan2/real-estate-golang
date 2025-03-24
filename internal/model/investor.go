@@ -18,6 +18,8 @@ type Investor struct {
 	Background  string    `json:"background" gorm:"type:varchar(255);null"`
 	Type        string    `json:"type" gorm:"type:varchar(50);not null"`
 
+    UserId      uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+    User        User      `json:"user" gorm:"foreignKey:UserId"`
     CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt 	time.Time `json:"updated_at"`
 }
