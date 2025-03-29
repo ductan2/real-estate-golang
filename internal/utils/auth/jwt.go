@@ -11,13 +11,14 @@ import (
 type PayloadClaims struct {
 	jwt.StandardClaims
 }
+
 func GenTokenJWT(payload *PayloadClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
 	return token.SignedString([]byte(global.Config.JWT.TokenSecret))
 }
 
 func CreateTokenJWT(payload *PayloadClaims) (string, error) {
-	
+
 	timeEx := global.Config.JWT.TokenExpirationTime
 	if timeEx == "" {
 		timeEx = "1h"
@@ -37,7 +38,7 @@ func CreateTokenJWT(payload *PayloadClaims) (string, error) {
 			Subject:   payload.Subject,
 		},
 	})
-	
+
 }
 
 func VerifyTokenJWT(token string) (*PayloadClaims, error) {
@@ -49,6 +50,3 @@ func VerifyTokenJWT(token string) (*PayloadClaims, error) {
 	}
 	return payload.Claims.(*PayloadClaims), nil
 }
-
-
-

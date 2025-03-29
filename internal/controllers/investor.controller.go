@@ -25,6 +25,20 @@ func NewInvestorController(investorService investorService.IInvestorService, use
 	}
 }
 
+func (c *InvestorController) GetMe(ctx *gin.Context) {
+	userId, exists := ctx.Request.Context().Value(middlewares.UserUUIDKey).(string)
+	if !exists || userId == "" {
+		response.ErrorResponse(ctx, response.Unauthorized, "User not authenticated")
+		return
+	}
+	investors, err := c.investorService.GetInvestorByUserId(userId)
+	if err != nil {
+		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		return
+	}
+	response.SuccessResponse(ctx, response.Success, investors)
+}
+
 // Create creates a new investor
 func (c *InvestorController) Create(ctx *gin.Context) {
 	var req vo.InvestorCreateRequest

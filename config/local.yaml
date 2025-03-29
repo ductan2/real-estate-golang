@@ -34,3 +34,12 @@ smtp:
   username: ndt11102003@gmail.com
   password: mnwmitfivjymkgzh
 
+
+elk:
+  elasticsearch_url: "http://localhost:9200"
+  logstash_url: "http://localhost:5044"
+  kibana_url: "http://localhost:5601"
+  index_name: "ecommerce-logs"
+  enabled: false
+  username: "elastic"
+  password: "changeme"

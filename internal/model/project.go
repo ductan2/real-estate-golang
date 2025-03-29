@@ -1,38 +1,34 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-type Price struct {
-	MinPrice float64 `json:"min_price" gorm:"type:decimal(10,2);not null"`
-	MaxPrice float64 `json:"max_price" gorm:"type:decimal(10,2);not null"`
-	Unit     string  `json:"unit" gorm:"type:varchar(30);not null"`
-	Currency string  `json:"currency" gorm:"type:varchar(30);not null"`
-}
 
 type Project struct {
-	ID              uuid.UUID      `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	Name            string         `json:"name" gorm:"type:varchar(100);not null"`
-	Description     string         `json:"description" gorm:"type:varchar(255);not null"`
-	LongDescription string         `json:"long_description" gorm:"type:text;not null"`
-	Status          string         `json:"status" gorm:"type:varchar(30);not null"`
-	AreaLand        float64        `json:"area_land" gorm:"type:decimal(10,2);not null"`
-	AreaBuild       *float64        `json:"area_build" gorm:"type:decimal(10,2);null"`
+	ID              uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Name            string    `json:"name" gorm:"type:varchar(100);not null"`
+	Description     string    `json:"description" gorm:"type:varchar(255);not null"`
+	LongDescription string    `json:"long_description" gorm:"type:text;not null"`
+	Status          string    `json:"status" gorm:"type:varchar(30);not null"`
+	AreaLand        float64   `json:"area_land" gorm:"type:decimal(10,2);not null"`
+	ProjectType string   `json:"project_type" gorm:"type:varchar(30);not null"`
+	Images json.RawMessage `json:"images" gorm:"type:jsonb;not null"`
+	Address     string   `json:"address" gorm:"type:varchar(255);not null"`
+	Apartment   *int     `json:"apartment" gorm:"type:int;null"`
+	IsPublish	bool 	 `json:"is_publish" gorm:"default:false"`
+	LegalStatus string   `json:"legal_status" gorm:"type:varchar(40);not null"`
 
-	ProjectType     string         `json:"project_type" gorm:"type:varchar(30);not null"`
-	Price           Price          `json:"price" gorm:"type:jsonb;not null"`
-	Images          []string       `json:"images" gorm:"type:jsonb;not null"`
-	Address         string         `json:"address" gorm:"type:varchar(255);not null"`
-	Apartment       *int            `json:"apartment" gorm:"type:int;null"`
-		
-	InvestorID      uuid.UUID      `json:"investor_id" gorm:"type:uuid;not null"`
-	Investor        Investor       `json:"investor" gorm:"foreignKey:InvestorID"`
+	StartDate *time.Time `json:"start_date" gorm:"type:timestamp;null"`
+	EndDate   *time.Time `json:"end_date" gorm:"type:timestamp;null"`
+	InvestorID uuid.UUID `json:"investor_id" gorm:"type:uuid;not null"`
+	Investor   Investor  `json:"investor" gorm:"foreignKey:InvestorID"`
 
-	CreatedAt       time.Time      `json:"created_at"`
-	UpdatedAt       time.Time      `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type LoanSupport struct {
@@ -52,12 +48,12 @@ type ProjectManager struct {
 	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
 	ProjectID uuid.UUID `json:"project_id" gorm:"type:uuid;not null"`
 	Project   Project   `json:"project" gorm:"foreignKey:ProjectID"`
-	
-	UserID    uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
-	User      User      `json:"user" gorm:"foreignKey:UserID"`
 
-	Role      string    `json:"role" gorm:"type:varchar(30);not null"` // admin, manager, viewer
-	Permission string    `json:"permission" gorm:"type:jsonb;not null"` // view only, full access, edit only, delete only
+	UserID uuid.UUID `json:"user_id" gorm:"type:uuid;not null"`
+	User   User      `json:"user" gorm:"foreignKey:UserID"`
+
+	Role       string `json:"role" gorm:"type:varchar(30);not null"` // admin, manager, viewer
+	Permission string `json:"permission" gorm:"type:jsonb;not null"` // view only, full access, edit only, delete only
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

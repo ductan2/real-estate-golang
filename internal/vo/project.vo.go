@@ -1,25 +1,34 @@
 package vo
 
-import "github.com/google/uuid"
-
-type Price struct {
-	MinPrice float64 `json:"min_price" binding:"required"`
-	MaxPrice float64 `json:"max_price" binding:"required"`
-	Unit     string  `json:"unit" binding:"required"`
-	Currency string  `json:"currency" binding:"required"`
-}
+import "time"
 
 type ProjectCreateRequest struct {
-	Name        string    `json:"name" binding:"required"`
-	Description string    `json:"description" binding:"required"`
-	LongDescription string    `json:"long_description" binding:"required"`
-	Status      string    `json:"status" binding:"required"`
-	Address     string    `json:"address" binding:"required"`
-	Area        float64   `json:"area" binding:"required"`
-	Images      []string  `json:"images" binding:"required"`
-	Apartment   *int      `json:"apartment"`
-	AreaBuild   *float64  `json:"area_build"`
-	ProjectType string    `json:"project_type" binding:"required"`
-	Price       Price     `json:"price" binding:"required"`
-	InvestorID  uuid.UUID `json:"investor_id" binding:"required"`
+	Name            string     `json:"name" binding:"required"`
+	Description     string     `json:"description" binding:"required"`
+	LongDescription string     `json:"longDescription" binding:"required"`
+	Status          string     `json:"status" binding:"required"`
+	AreaLand        float64    `json:"area" binding:"required,gt=0"`
+	ProjectType     string     `json:"projectType" binding:"required"`
+	Images          []any      `json:"images" binding:"required"`
+	LegalStatus     string     `json:"legalStatus" binding:"required"`
+	IsPublish       bool       `json:"isPublish"`
+	
+	Address         string     `json:"address" binding:"required"`
+	StartDate       *time.Time `json:"startDate" binding:"required"`
+	EndDate         *time.Time `json:"endDate" binding:"required"`
+	Apartment       *int       `json:"areaBuild"`
+	InvestorID      string     `json:"investorId" binding:"required,uuid"`
+}
+
+type ProjectUpdateRequest struct {
+	Name            *string   `json:"name"`
+	Description     *string   `json:"description"`
+	LongDescription *string   `json:"longDescription"`
+	Status          *string   `json:"status"`
+	AreaLand        *float64  `json:"areaLand"`
+	AreaBuild       *float64  `json:"areaBuild"`
+	ProjectType     *string   `json:"projectType"`
+	Images          *[]string `json:"images"`
+	Address         *string   `json:"address"`
+	Apartment       *int      `json:"apartment"`
 }

@@ -15,6 +15,7 @@ func (ir *InvestorRouter) InitInvestorRouter(Router *gin.RouterGroup) {
 	investorRouter.Use(middlewares.AuthenMiddleware())
 	{
 		investorRouter.POST("", investorController.Create)
+		investorRouter.GET("/me", investorController.GetMe)
 		investorRouter.GET("", investorController.GetAll)
 		investorRouter.GET(":id", investorController.GetById)
 		investorRouter.PUT(":id", investorController.Update)

@@ -13,14 +13,24 @@ type IInvestorRepository interface {
 	GetAll() ([]model.Investor, error)
 	Update(id string, investor *model.Investor) error
 	Delete(id string) error
+	GetInvestorByUserId(userId string) ([]model.Investor, error)
 }
 
-type investorRepository struct{
+type investorRepository struct {
 	db *gorm.DB
 }
 
+
 func NewInvestorRepository(db *gorm.DB) IInvestorRepository {
 	return &investorRepository{db: db}
+}
+func (r *investorRepository) GetInvestorByUserId(userId string) ([]model.Investor, error) {
+	var investors []model.Investor
+	err := r.db.Where("user_id = ?", userId).Find(&investors).Error
+	if err != nil {
+		return nil, err
+	}
+	return investors, nil
 }
 
 func (r *investorRepository) Create(investor *model.Investor) error {

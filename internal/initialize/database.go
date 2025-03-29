@@ -15,7 +15,7 @@ func InitDB() (*gorm.DB, error) {
 	db := global.Config.Database
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		db.Host, db.Port, db.Username, db.Password, db.Dbname)
-
+	
 	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
@@ -36,6 +36,7 @@ func InitDB() (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to migrate models: %w", err)
 	}
 	fmt.Println("Database migrated successfully")
+	
 	global.DB = gormDB
 	return gormDB, nil
 }

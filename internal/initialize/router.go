@@ -11,7 +11,7 @@ func InitRouter(r *gin.Engine) {
 	// Add logger middleware
 	r.Use(middlewares.Logger())
 
-	userRouter := routers.RouterGroupApp
+	mainRouter := routers.RouterGroupApp
 	MainGroup := r.Group("/api/v1")
 	{
 		MainGroup.GET("/ping", func(c *gin.Context) {
@@ -21,9 +21,10 @@ func InitRouter(r *gin.Engine) {
 		})
 	}
 	{
-		userRouter.User.InitUserRouter(MainGroup)
-		userRouter.Seller.InitSellerRouter(MainGroup)
-		userRouter.Admin.InitAdminRouter(MainGroup)
-		userRouter.Investor.InitInvestorRouter(MainGroup)
+		mainRouter.User.InitUserRouter(MainGroup)
+		mainRouter.Seller.InitSellerRouter(MainGroup)
+		mainRouter.Admin.InitAdminRouter(MainGroup)
+		mainRouter.Investor.InitInvestorRouter(MainGroup)
+		mainRouter.Project.InitProjectRouter(MainGroup)
 	}
 }

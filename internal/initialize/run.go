@@ -24,10 +24,10 @@ func Run() *gin.Engine {
 	InitCloudinary()
 	InitDB()
 	InitRedis()
+	// InitELK()
 	cors := InitCors()
 	r.Use(cors)
 	InitRouter(r)
 	// initialize kafka
-
 	return r
 }

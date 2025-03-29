@@ -14,16 +14,21 @@ type IInvestorService interface {
 	GetAll() ([]model.Investor, error)
 	Update(id string, investor *model.Investor) error
 	Delete(id string) error
+	GetInvestorByUserId(userId string) ([]model.Investor, error)
 }
 
 type investorService struct {
 	investorRepo repo.IInvestorRepository
 }
 
+
 func NewInvestorService(investorRepo repo.IInvestorRepository) IInvestorService {
 	return &investorService{
 		investorRepo: investorRepo,
 	}
+}
+func (s *investorService) GetInvestorByUserId(userId string) ([]model.Investor, error) {
+	return s.investorRepo.GetInvestorByUserId(userId)
 }
 
 func (s *investorService) Create(investor vo.InvestorCreateRequest, userId uuid.UUID) error {
