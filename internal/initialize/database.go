@@ -8,6 +8,7 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func InitDB() (*gorm.DB, error) {
@@ -15,12 +16,20 @@ func InitDB() (*gorm.DB, error) {
 	db := global.Config.Database
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		db.Host, db.Port, db.Username, db.Password, db.Dbname)
-	
-	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to database: %w", err)
+
+
+	// Create GORM config with logging
+	gormConfig := &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
 	}
 
+	// Open database with GORM and PostgreSQL
+	gormDB, err := gorm.Open(postgres.Open(dsn), gormConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	// Get the underlying *sql.DB
 	sqlDB, err := gormDB.DB()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get database instance: %w", err)
@@ -31,12 +40,17 @@ func InitDB() (*gorm.DB, error) {
 	sqlDB.SetMaxIdleConns(db.MaxIdleConnections)
 	sqlDB.SetConnMaxLifetime(time.Duration(db.MaxLifetimeConnection) * time.Second)
 
+	// Test the connection
+	if err := sqlDB.Ping(); err != nil {
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
 	// Auto migrate models
 	if err := AutoMigrate(gormDB); err != nil {
 		return nil, fmt.Errorf("failed to migrate models: %w", err)
 	}
 	fmt.Println("Database migrated successfully")
-	
+
 	global.DB = gormDB
 	return gormDB, nil
 }
@@ -45,4 +59,3 @@ func AutoMigrate(db *gorm.DB) error {
 	// Init tables here
 	return db.AutoMigrate(model.AllModels()...)
 }
-

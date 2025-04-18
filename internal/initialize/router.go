@@ -5,11 +5,17 @@ import (
 	"ecommerce/internal/routers"
 
 	"github.com/gin-gonic/gin"
+	"go.elastic.co/apm"
+	"go.elastic.co/apm/module/apmgin"
 )
 
 func InitRouter(r *gin.Engine) {
-	// Add logger middleware
+	// Configure APM middleware with error tracking
+	apmMiddleware := apmgin.Middleware(r, apmgin.WithTracer(apm.DefaultTracer))
+
+	// Add middlewares
 	r.Use(middlewares.Logger())
+	r.Use(apmMiddleware)
 
 	mainRouter := routers.RouterGroupApp
 	MainGroup := r.Group("/api/v1")

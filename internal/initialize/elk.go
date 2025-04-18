@@ -15,7 +15,6 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-// Custom hook để gửi log lên Elasticsearch
 type ElasticHook struct {
 	ElasticsearchURL string
 	IndexName        string
@@ -23,7 +22,6 @@ type ElasticHook struct {
 	Password         string
 }
 
-// Gửi log đến Elasticsearch
 func (hook *ElasticHook) Fire(entry *logrus.Entry) error {
 	logData, err := json.Marshal(entry.Data)
 	if err != nil {
@@ -36,7 +34,6 @@ func (hook *ElasticHook) Fire(entry *logrus.Entry) error {
 	}
 	req.Header.Set("Content-Type", "application/json")
 
-	// Nếu có username/password, thêm Basic Auth
 	if hook.Username != "" && hook.Password != "" {
 		req.SetBasicAuth(hook.Username, hook.Password)
 	}
@@ -54,7 +51,6 @@ func (hook *ElasticHook) Fire(entry *logrus.Entry) error {
 	return nil
 }
 
-// Bắt buộc phải có để logrus nhận Hook
 func (hook *ElasticHook) Levels() []logrus.Level {
 	return logrus.AllLevels
 }
@@ -64,7 +60,6 @@ func InitELK() {
 		return
 	}
 
-	// Khởi tạo Elasticsearch client
 	cfg := elasticsearch.Config{
 		Addresses: []string{global.Config.ELK.ElasticsearchURL},
 		Username:  global.Config.ELK.Username,
@@ -75,7 +70,6 @@ func InitELK() {
 		log.Fatalf("Error creating Elasticsearch client: %s", err)
 	}
 
-	// Kiểm tra kết nối Elasticsearch
 	res, err := esClient.Info()
 	if err != nil {
 		log.Fatalf("Error getting Elasticsearch info: %s", err)
@@ -83,7 +77,6 @@ func InitELK() {
 	defer res.Body.Close()
 	fmt.Println("Connected to Elasticsearch:", res)
 
-	// Kiểm tra và tạo index nếu chưa tồn tại
 	indexName := global.Config.ELK.IndexName
 	exists, err := esClient.Indices.Exists([]string{indexName})
 	if err != nil {
@@ -92,7 +85,6 @@ func InitELK() {
 	defer exists.Body.Close()
 
 	if exists.StatusCode == 404 {
-		// Tạo index với mapping
 		createIndex, err := esClient.Indices.Create(
 			indexName,
 			esClient.Indices.Create.WithBody(strings.NewReader(`{
@@ -114,13 +106,11 @@ func InitELK() {
 		fmt.Println("Index created successfully:", indexName)
 	}
 
-	// Cấu hình Logrus
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{
 		TimestampFormat: time.RFC3339,
 	})
 
-	// Ghi log vào file
 	logger.SetOutput(&lumberjack.Logger{
 		Filename:   "logs/app.log",
 		MaxSize:    100, // MB
@@ -129,14 +119,12 @@ func InitELK() {
 		Compress:   true, // Nén file log
 	})
 
-	// Cấu hình mức log
 	level, err := logrus.ParseLevel("info")
 	if err != nil {
 		log.Fatalf("Error parsing log level: %s", err)
 	}
 	logger.SetLevel(level)
 
-	// Thêm hook gửi log đến Elasticsearch
 	elasticHook := &ElasticHook{
 		ElasticsearchURL: global.Config.ELK.ElasticsearchURL,
 		IndexName:        global.Config.ELK.IndexName,

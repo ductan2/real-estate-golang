@@ -2,7 +2,7 @@ package initialize
 
 import (
 	"ecommerce/global"
-
+	
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,7 +11,9 @@ func Run() *gin.Engine {
 	// initialize database
 	// initialize redis
 	InitEnv()
+	cors := InitCors()
 	var r *gin.Engine
+	
 	if global.Config.Server.Mode == "dev" {
 		gin.SetMode(gin.DebugMode)
 		gin.ForceConsoleColor()
@@ -20,13 +22,13 @@ func Run() *gin.Engine {
 		gin.SetMode(gin.ReleaseMode)
 		r = gin.New()
 	}
+	r.Use(cors)
 	LoadConfig()
 	InitCloudinary()
 	InitDB()
 	InitRedis()
 	// InitELK()
-	cors := InitCors()
-	r.Use(cors)
+	InitRabbitMQ()
 	InitRouter(r)
 	// initialize kafka
 	return r

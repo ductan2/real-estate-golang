@@ -37,6 +37,7 @@ func AuthenMiddleware() gin.HandlerFunc {
 func AdminMiddleware(adminService services.IAdminService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userUUID := c.Request.Context().Value(UserUUIDKey).(string)
+		println("userUUID", userUUID)
 		user, err := adminService.CheckAdmin(userUUID)
 		if err != nil || !user {
 			response.ErrorResponse(c, response.Unauthorized, "Unauthorized")
@@ -44,4 +45,16 @@ func AdminMiddleware(adminService services.IAdminService) gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+func OptionalAuthMiddleware() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        if accessToken, err := c.Cookie("access_token"); err == nil {
+            if claims, err := auth.VerifyTokenJWT(accessToken); err == nil {
+                ctx := context.WithValue(c.Request.Context(), UserUUIDKey, claims.Subject)
+                c.Request = c.Request.WithContext(ctx)
+            }
+        }
+        c.Next()
+    }
 }

@@ -54,3 +54,22 @@ func SendEmailOtp(to []string, from string, otp int) error {
 
 	return nil
 }
+
+func SendEmail(to []string, from string, subject string, body string) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", from)
+	m.SetHeader("To", to...)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/plain", body)
+	
+	d := gomail.NewDialer(global.Config.SMTP.Host, global.Config.SMTP.Port, global.Config.SMTP.Username, global.Config.SMTP.Password)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	if err := d.DialAndSend(m); err != nil {
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+
+	return nil
+}
+
+

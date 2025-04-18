@@ -1,6 +1,7 @@
 package investor
 
 import (
+	"ecommerce/internal/filters"
 	"ecommerce/internal/model"
 
 	"github.com/google/uuid"
@@ -10,7 +11,7 @@ import (
 type IInvestorRepository interface {
 	Create(investor *model.Investor) error
 	GetById(id string) (*model.Investor, error)
-	GetAll() ([]model.Investor, error)
+	GetAll(page int, limit int, filter *filters.InvestorFilter) ([]model.Investor, int64, error)
 	Update(id string, investor *model.Investor) error
 	Delete(id string) error
 	GetInvestorByUserId(userId string) ([]model.Investor, error)
@@ -46,13 +47,26 @@ func (r *investorRepository) GetById(id string) (*model.Investor, error) {
 	return &investor, nil
 }
 
-func (r *investorRepository) GetAll() ([]model.Investor, error) {
+func (r *investorRepository) GetAll(page int, limit int, filter *filters.InvestorFilter) ([]model.Investor, int64, error) {
 	var investors []model.Investor
-	err := r.db.Find(&investors).Error
-	if err != nil {
-		return nil, err
+	var total int64
+	if filter.Email != nil {
+		r.db = r.db.Where("email = ?", *filter.Email)
 	}
-	return investors, nil
+	if filter.Phone != nil {
+		r.db = r.db.Where("phone = ?", *filter.Phone)
+	}
+	if filter.Address != nil {
+		r.db = r.db.Where("address LIKE ?", "%"+*filter.Address+"%")
+	}
+	if filter.Website != nil {
+		r.db = r.db.Where("website LIKE ?", "%"+*filter.Website+"%")
+	}
+	err := r.db.Offset((page - 1) * limit).Limit(limit).Find(&investors).Count(&total).Error
+	if err != nil {
+		return nil, 0, err
+	}
+	return investors, total, nil
 }
 
 func (r *investorRepository) Update(id string, investor *model.Investor) error {

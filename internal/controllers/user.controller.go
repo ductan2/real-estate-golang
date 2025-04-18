@@ -6,6 +6,7 @@ import (
 	"ecommerce/internal/storage/cloudinary"
 	"ecommerce/internal/vo"
 	"ecommerce/pkg/response"
+	"errors"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -54,12 +55,12 @@ func (c *UserController) VerifyOtp(ctx *gin.Context) {
 	params := vo.UserVerifyOtpRequest{}
 	err := ctx.ShouldBindBodyWithJSON(&params)
 	if err != nil {
-		response.ErrorResponse(ctx, response.UnprocessableEntity, err.Error())
+		middlewares.HandleError(ctx, err, response.BadRequest)
 		return
 	}
 	err = c.userService.VerifyOtp(params.Email, params.Otp)
 	if err != nil {
-		response.ErrorResponse(ctx, response.BadRequest, err.Error())
+		middlewares.HandleError(ctx, err, response.BadRequest)
 		return
 	}
 
@@ -70,7 +71,7 @@ func (c *UserController) ResendOtp(ctx *gin.Context) {
 	params := vo.UserResendOtpRequest{}
 	err := ctx.ShouldBindBodyWithJSON(&params)
 	if err != nil {
-		response.ErrorResponse(ctx, response.UnprocessableEntity, err.Error())
+		middlewares.HandleError(ctx, err, response.UnprocessableEntity)
 		return
 	}
 	go func(email string) {
@@ -85,13 +86,13 @@ func (c *UserController) Login(ctx *gin.Context) {
 	params := vo.UserLoginRequest{}
 	err := ctx.ShouldBindBodyWithJSON(&params)
 	if err != nil {
-		response.ErrorResponse(ctx, response.UnprocessableEntity, err.Error())
+		middlewares.HandleError(ctx, err, response.UnprocessableEntity)
 		return
 	}
 	ip := ctx.ClientIP()
 	token, err := c.userService.Login(params.Email, params.Password, ip)
 	if err != nil {
-		response.ErrorResponse(ctx, response.BadRequest, err.Error())
+		middlewares.HandleError(ctx, err, response.BadRequest)
 		return
 	}
 	// asign token to cookie
@@ -104,7 +105,7 @@ func (c *UserController) Logout(ctx *gin.Context) {
 	userId := ctx.Request.Context().Value(middlewares.UserUUIDKey).(string)
 	err := c.userService.Logout(userId)
 	if err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 	ctx.SetCookie("access_token", "", -1, "/", "", false, true)
@@ -122,13 +123,13 @@ func (c *UserController) UpdateUserInfo(ctx *gin.Context) {
 
 	var params vo.UserUpdateInfoRequest
 	if err := ctx.ShouldBindJSON(&params); err != nil {
-		response.ErrorResponse(ctx, response.UnprocessableEntity, err.Error())
+		middlewares.HandleError(ctx, err, response.UnprocessableEntity)
 		return
 	}
 
 	err := c.userService.UpdateUserInfo(userId, params)
 	if err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 
@@ -143,21 +144,21 @@ func (c *UserController) UploadAvatar(ctx *gin.Context) {
 	// Get the file from the request
 	file, err := ctx.FormFile("avatar")
 	if err != nil {
-		response.ErrorResponse(ctx, response.BadRequest, err.Error())
+		middlewares.HandleError(ctx, err, response.BadRequest)
 		return
 	}
 
 	// Get Cloudinary service
 	imageService := cloudinary.GetImageService()
 	if imageService == nil {
-		response.ErrorResponse(ctx, response.InternalServerError, "Image service not initialized")
+		middlewares.HandleError(ctx, errors.New("image service not initialized"), response.InternalServerError)
 		return
 	}
 
 	// Upload image to Cloudinary
 	imageUrl, err := imageService.UploadImage(file, "avatars")
 	if err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 
@@ -166,7 +167,7 @@ func (c *UserController) UploadAvatar(ctx *gin.Context) {
 	if err != nil {
 		// If database update fails, try to remove the uploaded image
 		_ = imageService.RemoveImage(imageUrl)
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 

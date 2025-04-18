@@ -9,6 +9,7 @@ type Config struct {
 	APMServer APMServer `mapstructure:"apm_server"`
 	ELK       ELK       `mapstructure:"elk"`
 	Logger    Logger    `mapstructure:"logger"`
+	RabbitMQ  RabbitMQ  `mapstructure:"rabbitmq"`
 }
 
 type Server struct {
@@ -69,4 +70,12 @@ type Logger struct {
 	Level       string `mapstructure:"level"`
 	Format      string `mapstructure:"format"`
 	FileLogName string `mapstructure:"file_log_name"`
+}
+
+type RabbitMQ struct {
+	Host      string `mapstructure:"host"`
+	Port      int    `mapstructure:"port"`
+	Username  string `mapstructure:"username"`
+	Password  string `mapstructure:"password"`
+	QueueName string `mapstructure:"queue_name"`
 }

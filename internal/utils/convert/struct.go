@@ -1,6 +1,9 @@
 package convert
 
-import "reflect"
+import (
+	"reflect"
+	"strings"
+)
 
 // StructToMap converts a struct to a map, using json tags as keys
 // Only non-nil pointer fields will be included in the map
@@ -22,4 +25,11 @@ func StructToMap(input interface{}) map[string]interface{} {
 	}
 
 	return result
+}
+
+// Helper function to check if string contains substring (case insensitive)
+func ContainsIgnoreCase(s, substr string) bool {
+	s = strings.ToLower(s)
+	substr = strings.ToLower(substr)
+	return strings.Contains(s, substr)
 }

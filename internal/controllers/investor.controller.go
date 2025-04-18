@@ -1,12 +1,13 @@
 package controllers
 
 import (
+	"ecommerce/internal/filters"
 	"ecommerce/internal/middlewares"
 	"ecommerce/internal/model"
 	investorService "ecommerce/internal/services/investor"
 	"ecommerce/internal/vo"
 	"ecommerce/pkg/response"
-	"fmt"
+	"strconv"
 
 	userService "ecommerce/internal/services/user"
 
@@ -81,14 +82,23 @@ func (c *InvestorController) GetById(ctx *gin.Context) {
 
 // GetAll gets all investors
 func (c *InvestorController) GetAll(ctx *gin.Context) {
-	fmt.Println("GetAll")
-	investors, err := c.investorService.GetAll()
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "10"))
+
+	filter := &filters.InvestorFilter{}
+
+	investors, total, err := c.investorService.GetAll(page, limit, filter)
 	if err != nil {
 		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
 		return
 	}
 
-	response.SuccessResponse(ctx, response.Success, investors)
+	response.SuccessResponse(ctx, response.Success, gin.H{
+		"investors": investors,
+		"total":     total,
+		"page":      page,
+		"limit":     limit,
+	})
 }
 
 // Update updates an investor

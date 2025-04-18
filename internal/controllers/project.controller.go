@@ -1,16 +1,23 @@
 package controllers
 
 import (
+	"context"
+	"ecommerce/global"
 	"ecommerce/internal/filters"
+	"ecommerce/internal/middlewares"
 	"ecommerce/internal/model"
 	projectService "ecommerce/internal/services/project"
+	"ecommerce/internal/utils/convert"
 	"ecommerce/internal/vo"
 	"ecommerce/pkg/response"
 	"encoding/json"
 	"strconv"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type ProjectController struct {
@@ -26,7 +33,7 @@ func NewProjectController(projectService projectService.IProjectService) *Projec
 func (c *ProjectController) Create(ctx *gin.Context) {
 	var req vo.ProjectCreateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.ErrorResponse(ctx, response.UnprocessableEntity, err.Error())
+		middlewares.HandleError(ctx, err, response.UnprocessableEntity)
 		return
 	}
 	imagesJson, _ := json.Marshal(req.Images)
@@ -48,7 +55,7 @@ func (c *ProjectController) Create(ctx *gin.Context) {
 	}
 
 	if err := c.projectService.CreateProject(project); err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 
@@ -59,7 +66,7 @@ func (c *ProjectController) GetById(ctx *gin.Context) {
 	projectId := ctx.Param("id")
 	project, err := c.projectService.GetProjectById(projectId)
 	if err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 
@@ -76,7 +83,28 @@ func (c *ProjectController) GetAll(ctx *gin.Context) {
 	// Get optional filters from query parameters
 	if name := ctx.Query("name"); name != "" {
 		filter.Name = &name
+		userId, _ := ctx.Request.Context().Value(middlewares.UserUUIDKey).(string)
+
+		// Use goroutine for Redis operations
+		go func() {
+			// pipeline use for execute multiple commands in a single round trip to the server
+			pipeline := global.Redis.Pipeline()
+			if userId != "" {
+				userKey := "user_search:" + userId + "_project_name_suggest"
+				pipeline.ZIncrBy(context.Background(), userKey, 1, name)
+				pipeline.Expire(context.Background(), userKey, 24*time.Hour)
+			}
+
+			pipeline.ZIncrBy(context.Background(), "project_name_suggest", 1, name)
+			pipeline.Expire(context.Background(), "project_name_suggest", 24*time.Hour)
+			_, err := pipeline.Exec(context.Background())
+			if err != nil {
+				middlewares.HandleError(ctx, err, response.InternalServerError)
+				return
+			}
+		}()
 	}
+
 	if status := ctx.Query("status"); status != "" {
 		filter.Status = &status
 	}
@@ -87,16 +115,22 @@ func (c *ProjectController) GetAll(ctx *gin.Context) {
 	if investorID := ctx.Query("investor_id"); investorID != "" {
 		filter.InvestorID = &investorID
 	}
+	if province := ctx.Query("province"); province != "" {
+		filter.Province = &province
+	}
+
 
 	projects, total, err := c.projectService.GetAllProjects(page, limit, filter)
 	if err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 
 	response.SuccessResponse(ctx, response.Success, gin.H{
 		"projects": projects,
 		"total":    total,
+		"page":     page,
+		"limit":    limit,
 	})
 }
 
@@ -104,7 +138,7 @@ func (c *ProjectController) Update(ctx *gin.Context) {
 	projectId := ctx.Param("id")
 	var req vo.ProjectUpdateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		response.ErrorResponse(ctx, response.UnprocessableEntity, err.Error())
+		middlewares.HandleError(ctx, err, response.UnprocessableEntity)
 		return
 	}
 
@@ -122,7 +156,7 @@ func (c *ProjectController) Update(ctx *gin.Context) {
 	}
 
 	if err := c.projectService.UpdateProject(projectId, updates); err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 
@@ -132,7 +166,7 @@ func (c *ProjectController) Update(ctx *gin.Context) {
 func (c *ProjectController) Delete(ctx *gin.Context) {
 	projectId := ctx.Param("id")
 	if err := c.projectService.DeleteProject(projectId); err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 
@@ -146,7 +180,7 @@ func (c *ProjectController) GetByInvestor(ctx *gin.Context) {
 
 	projects, total, err := c.projectService.GetProjectsByInvestor(investorId, page, limit)
 	if err != nil {
-		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		middlewares.HandleError(ctx, err, response.InternalServerError)
 		return
 	}
 
@@ -154,4 +188,60 @@ func (c *ProjectController) GetByInvestor(ctx *gin.Context) {
 		"projects": projects,
 		"total":    total,
 	})
+}
+
+func (c *ProjectController) Suggest(ctx *gin.Context) {
+	keyword := ctx.Query("keyword")
+	suggestions := make([]string, 0)
+	seen := make(map[string]bool)
+
+	userID, _ := ctx.Request.Context().Value(middlewares.UserUUIDKey).(string)
+
+	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	var wg sync.WaitGroup
+	results := make(chan []string, 2)
+
+	getSearches := func(key string, count int64) {
+		defer wg.Done()
+		result, err := global.Redis.ZRevRangeByScore(ctxWithTimeout, key, &redis.ZRangeBy{
+			Min:    "-inf",
+			Max:    "+inf",
+			Offset: 0,
+			Count:  count,
+		}).Result()
+		if err == nil {
+			results <- result // send result to channel
+		} else {
+			results <- []string{} // send empty result to channel
+		}
+	}
+
+	// Start goroutines for both user and global searches
+	if userID != "" {
+		wg.Add(1) // Increment the WaitGroup counter to indicate a new goroutine is being added for user-specific searches
+		go getSearches("user_search:"+userID+"_project_name_suggest", 10)
+	}
+
+	wg.Add(1)
+	go getSearches("project_name_suggest", 10)
+
+	// Wait for all goroutines to complete
+	wg.Wait()
+	close(results)
+
+	// Process results
+	for searches := range results {
+		for _, search := range searches {
+			if keyword == "" || convert.ContainsIgnoreCase(search, keyword) {
+				if !seen[search] {
+					suggestions = append(suggestions, search)
+					seen[search] = true
+				}
+			}
+		}
+	}
+
+	response.SuccessResponse(ctx, response.Success, suggestions)
 }

@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"go.elastic.co/apm"
 )
 
 type IUserService interface {
@@ -87,9 +88,11 @@ func (s *userService) Login(email string, password string, ip string) (string, e
 func (s *userService) VerifyOtp(email string, otp int) error {
 	storedOtp, err := global.Redis.Get(context.Background(), email).Result()
 	if err != nil {
+		apm.CaptureError(context.Background(), err).Send()
 		return errors.New("OTP is incorrect")
 	}
 	if storedOtp != crypto.GetHash(strconv.Itoa(otp)) {
+		apm.CaptureError(context.Background(), errors.New("OTP is incorrect")).Send()
 		return errors.New("OTP is incorrect")
 	}
 	err = s.userRepo.VerifyOtp(email, otp)

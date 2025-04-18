@@ -2,12 +2,13 @@ server:
   port: 8080
   mode: dev
   frontend_url: http://localhost:3000
+
 database:
   host: localhost
   port: 5432
-  user: ductan
+  user: go_admin
   password: 123456
-  dbname: ecommerce
+  dbname: shopgo
   maxOpenConnections: 10
   maxIdleConnections: 5
   maxLifetimeConnection: 3600
@@ -34,7 +35,6 @@ smtp:
   username: ndt11102003@gmail.com
   password: mnwmitfivjymkgzh
 
-
 elk:
   elasticsearch_url: "http://localhost:9200"
   logstash_url: "http://localhost:5044"
@@ -43,3 +43,9 @@ elk:
   enabled: false
   username: "elastic"
   password: "changeme"
+
+rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest

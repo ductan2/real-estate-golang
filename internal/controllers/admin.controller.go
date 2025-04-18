@@ -5,6 +5,7 @@ import (
 	services "ecommerce/internal/services/user"
 	"ecommerce/internal/vo"
 	"ecommerce/pkg/response"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,11 +38,14 @@ func (c *AdminController) ApproveSellerRequest(ctx *gin.Context) {
 		return
 	}
 	sellerExist := c.sellerService.GetSeller(params.SellerID)
-	if sellerExist == nil || !sellerExist.IsVerified {
+	fmt.Println("sellerExist", sellerExist)
+	if sellerExist == nil || sellerExist.IsVerified {
+		fmt.Println("wwwww")
 		response.ErrorResponse(ctx, response.NotFound, "Seller not found")
 		return
 	}
-	err = c.adminService.ApproveSellerRequest(userId, params.SellerID, params.Approved)
+	fmt.Println("email", sellerExist.User.Email)
+	err = c.adminService.ApproveSellerRequest(userId, params.SellerID, sellerExist.User.Email, params.Approved)
 	if err != nil {
 		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
 		return

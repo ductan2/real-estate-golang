@@ -4,17 +4,20 @@ import (
 	"ecommerce/internal/filters"
 	"ecommerce/internal/model"
 	"errors"
+	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
 
 type IProjectRepository interface {
-	CreateProject(payload *model.Project) error
+	CreateProject(project *model.Project) error
 	GetProjectById(projectId string) (*model.Project, error)
 	GetAllProjects(page int, limit int, filter *filters.ProjectFilter) ([]*model.Project, int64, error)
 	UpdateProject(projectId string, updates map[string]interface{}) error
 	DeleteProject(projectId string) error
 	GetProjectsByInvestor(investorId string, page, limit int) ([]*model.Project, int64, error)
+	GetProjectsExpiringToday() ([]*model.Project, error)
 }
 
 type projectRepository struct {
@@ -60,11 +63,15 @@ func (s *projectRepository) GetAllProjects(page int, limit int, filter *filters.
 		if filter.InvestorID != nil && *filter.InvestorID != "" {
 			query = query.Where("investor_id = ?", *filter.InvestorID)
 		}
+		if filter.Province != nil && *filter.Province != "" {
+			query = query.Where("province like ?", "%"+*filter.Province)
+		}
 	}
 
 	// Get total count
 	err := query.Count(&total).Error
 	if err != nil {
+		fmt.Println("Error getting total count:", err)
 		return nil, 0, err
 	}
 
@@ -75,6 +82,7 @@ func (s *projectRepository) GetAllProjects(page int, limit int, filter *filters.
 		Order("created_at DESC").
 		Find(&projects).Error
 	if err != nil {
+		fmt.Println("Error getting paginated results:", err)
 		return nil, 0, err
 	}
 
@@ -124,6 +132,18 @@ func (s *projectRepository) GetProjectsByInvestor(investorId string, page, limit
 	}
 
 	return projects, total, nil
+}
+
+func (r *projectRepository) GetProjectsExpiringToday() ([]*model.Project, error) {
+	var projects []*model.Project
+	today := time.Now()
+
+	err := r.db.Where("DATE(end_date) = ?", today).Find(&projects).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return projects, nil
 }
 
 func NewProjectRepository(db *gorm.DB) IProjectRepository {

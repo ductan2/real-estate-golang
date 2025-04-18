@@ -57,7 +57,7 @@ type Seller struct {
 	BlockedBy     *uuid.UUID `json:"blocked_by" gorm:"type:uuid;default:null"`
 	BlockedByUser *User      `json:"blocked_by_user" gorm:"foreignKey:BlockedBy"`
 	BlockedReason *string    `json:"blocked_reason" gorm:"default:null"`
-
+	User          *User      `json:"user" gorm:"foreignKey:UserId"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
