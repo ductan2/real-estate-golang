@@ -15,5 +15,7 @@ func (sr *SellerRouter) InitSellerRouter(Router *gin.RouterGroup) {
 	sellerRouter.Use(middlewares.AuthenMiddleware())
 	{
 		sellerRouter.POST("apply", sellerController.ApplyForSeller)
+		sellerRouter.GET("all", sellerController.GetAllSeller)
+		sellerRouter.GET(":sellerId", sellerController.GetSellerDetail)
 	}
 }

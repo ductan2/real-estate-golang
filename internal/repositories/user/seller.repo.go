@@ -12,6 +12,7 @@ import (
 type ISellerRepository interface {
 	CreateSeller(userId uuid.UUID) error
 	GetSellerById(sellerId string) (*model.Seller, error)
+	GetAllSeller() ([]*model.Seller, error)
 }
 
 type sellerRepository struct {
@@ -37,6 +38,16 @@ func (s *sellerRepository) GetSellerById(sellerId string) (*model.Seller, error)
 		return nil, err
 	}
 	return &seller, nil
+}
+
+// GetAllSeller implements ISellerRepository.
+func (s *sellerRepository) GetAllSeller() ([]*model.Seller, error) {
+	var sellers []*model.Seller
+	err := s.db.Preload("User").Find(&sellers).Error
+	if err != nil {
+		return nil, err
+	}
+	return sellers, nil
 }
 
 func NewSellerRepository(db *gorm.DB) ISellerRepository {

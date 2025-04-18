@@ -25,3 +25,22 @@ func (c *SellerController) ApplyForSeller(ctx *gin.Context) {
 	}
 	response.SuccessResponse(ctx, response.Success, "Apply for seller successfully")
 }
+
+func (c *SellerController) GetAllSeller(ctx *gin.Context) {
+	sellers, err := c.sellerService.GetAllSeller()
+	if err != nil {
+		response.ErrorResponse(ctx, response.InternalServerError, err.Error())
+		return
+	}
+	response.SuccessResponse(ctx, response.Success, sellers)
+}
+
+func (c *SellerController) GetSellerDetail(ctx *gin.Context) {
+	sellerId := ctx.Param("sellerId")
+	seller := c.sellerService.GetSeller(sellerId)
+	if seller == nil {
+		response.ErrorResponse(ctx, response.NotFound, "Seller not found")
+		return
+	}
+	response.SuccessResponse(ctx, response.Success, seller)
+}

@@ -10,6 +10,7 @@ import (
 type ISellerService interface {
 	ApplyForSeller(userId string) error
 	GetSeller(sellerId string) *model.Seller
+	GetAllSeller() ([]*model.Seller, error)
 }
 
 type sellerService struct {
@@ -23,6 +24,11 @@ func (s *sellerService) GetSeller(sellerId string) *model.Seller {
 		return nil
 	}
 	return seller
+}
+
+// GetAllSeller implements ISellerService.
+func (s *sellerService) GetAllSeller() ([]*model.Seller, error) {
+	return s.sellerRepo.GetAllSeller()
 }
 
 // ApplyForSeller implements ISellerService.
