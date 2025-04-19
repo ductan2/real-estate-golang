@@ -8,7 +8,7 @@ database:
   port: 5432
   user: go_admin
   password: 123456
-  dbname: shopgo
+  dbname: real_estate
   maxOpenConnections: 10
   maxIdleConnections: 5
   maxLifetimeConnection: 3600
