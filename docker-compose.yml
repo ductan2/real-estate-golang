@@ -1,6 +1,24 @@
 version: "3.9"
 
 services:
+    server:
+        container_name: server_container
+        image: server:latest
+        depends_on:
+            - postgres
+            - redis
+        env_file:
+          - .env
+        ports:
+            - "8080:8080"
+        networks:
+            - elastic
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            
     postgres:
         container_name: postgres_container
         image: postgres:latest
