@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	Config setting.Config
+	Config   setting.Config
 	RabbitMQ *queue.QueueService
-	DB     *gorm.DB
-	Redis  *redis.Client
-	Logger *logrus.Logger
+	DB       *gorm.DB
+	Redis    *redis.Client
+	Logger   *logrus.Logger
 )

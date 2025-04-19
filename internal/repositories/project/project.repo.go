@@ -18,6 +18,7 @@ type IProjectRepository interface {
 	DeleteProject(projectId string) error
 	GetProjectsByInvestor(investorId string, page, limit int) ([]*model.Project, int64, error)
 	GetProjectsExpiringToday() ([]*model.Project, error)
+	UpdateProjectStatus(updates map[string]interface{}) error
 }
 
 type projectRepository struct {
@@ -144,6 +145,18 @@ func (r *projectRepository) GetProjectsExpiringToday() ([]*model.Project, error)
 	}
 
 	return projects, nil
+}
+
+func (r *projectRepository) UpdateProjectStatus(updates map[string]interface{}) error {
+	// Update all projects that have expired
+	result := r.db.Model(&model.Project{}).
+		Where("end_date < ? AND status != ?", time.Now(), "expired").
+		Updates(updates)
+
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 func NewProjectRepository(db *gorm.DB) IProjectRepository {

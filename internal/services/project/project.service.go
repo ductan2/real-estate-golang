@@ -21,6 +21,7 @@ type IProjectService interface {
 	UpdateProject(projectId string, updates map[string]interface{}) error
 	DeleteProject(projectId string) error
 	GetProjectsByInvestor(investorId string, page, limit int) ([]*model.Project, int64, error)
+	UpdateProjectStatus(updates map[string]interface{}) error
 }
 
 type projectService struct {
@@ -75,6 +76,10 @@ func (s *projectService) GetProjectsByInvestor(investorId string, page, limit in
 		limit = 10
 	}
 	return s.projectRepo.GetProjectsByInvestor(investorId, page, limit)
+}
+
+func (s *projectService) UpdateProjectStatus(updates map[string]interface{}) error {
+	return s.projectRepo.UpdateProjectStatus(updates)
 }
 
 func NewProjectService(projectRepo project.IProjectRepository) IProjectService {

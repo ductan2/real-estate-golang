@@ -27,9 +27,7 @@ func Run() *gin.Engine {
 	InitCloudinary()
 	InitDB()
 	InitRedis()
-	// InitELK()
 	InitRabbitMQ()
 	InitRouter(r)
-	// initialize kafka
 	return r
 }
