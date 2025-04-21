@@ -1,0 +1,51 @@
+server:
+  port: 8080
+  mode: dev
+  frontend_url: http://localhost:3000
+
+database:
+  host: localhost
+  port: 5432
+  user: go_admin
+  password: 123456
+  dbname: real_estate
+  maxOpenConnections: 10
+  maxIdleConnections: 5
+  maxLifetimeConnection: 3600
+
+logger:
+  level: debug
+  format: json
+  file_log_name: ./storages/logs/app.log
+
+redis:
+  host: localhost
+  port: 6379
+  password: 
+  database: 0
+
+jwt:
+  tokenSecret: "secret"
+  tokenExpirationTime: 24h
+  tokenHoursToExpire: 24
+
+smtp:
+  host: smtp.gmail.com
+  port: 587
+  username: ndt11102003@gmail.com
+  password: mnwmitfivjymkgzh
+
+elk:
+  elasticsearch_url: "http://localhost:9200"
+  logstash_url: "http://localhost:5044"
+  kibana_url: "http://localhost:5601"
+  index_name: "ecommerce-logs"
+  enabled: false
+  username: "elastic"
+  password: "changeme"
+
+rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: guest
+  password: guest
