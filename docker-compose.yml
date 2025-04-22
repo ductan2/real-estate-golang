@@ -292,6 +292,7 @@ services:
         - prometheus
         networks:
         - elastic
+
 networks:
     elastic:
         driver: bridge
