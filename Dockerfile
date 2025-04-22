@@ -2,9 +2,12 @@ FROM golang:1.24.0-alpine AS builder
 
 WORKDIR /app
 
-COPY . .
-
+# Copy go.mod and go.sum first to leverage Docker cache
+COPY go.mod go.sum ./
 RUN go mod download
+
+# Copy source code
+COPY . .
 
 RUN go build -o server ./cmd/server
 
