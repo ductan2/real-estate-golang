@@ -1,13 +1,14 @@
 package controllers
 
 import (
+	"ecommerce/global"
 	"ecommerce/internal/middlewares"
 	services "ecommerce/internal/services/user"
 	"ecommerce/internal/storage/cloudinary"
+	"ecommerce/internal/utils/auth"
 	"ecommerce/internal/vo"
 	"ecommerce/pkg/response"
 	"errors"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,7 +45,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 	}
 	go func(email string) {
 		if err := c.userService.SendOtp(email); err != nil {
-			fmt.Println("Send OTP error:", err)
+			global.Logger.Errorf("Send OTP error: %v", err)
 		}
 	}(params.Email)
 
@@ -76,7 +77,7 @@ func (c *UserController) ResendOtp(ctx *gin.Context) {
 	}
 	go func(email string) {
 		if err := c.userService.SendOtp(email); err != nil {
-			fmt.Println("Send OTP error:", err)
+			global.Logger.Errorf("Send OTP error: %v", err)
 		}
 	}(params.Email)
 	response.SuccessResponse(ctx, response.Success, "Resend OTP successfully")
@@ -89,8 +90,13 @@ func (c *UserController) Login(ctx *gin.Context) {
 		middlewares.HandleError(ctx, err, response.UnprocessableEntity)
 		return
 	}
-	ip := ctx.ClientIP()
-	token, err := c.userService.Login(params.Email, params.Password, ip)
+	userSession := vo.UserSession{
+ 		IpAddress: ctx.ClientIP(),
+		Location:  auth.GetLocationFromIP(ctx.ClientIP()),
+		Device:    auth.GetUserAgentDetails(ctx.Request.Header.Get("User-Agent")).Platform(),
+ 		UserAgent: ctx.Request.Header.Get("User-Agent"),
+ 	}
+	token, err := c.userService.Login(params.Email, params.Password, userSession)
 	if err != nil {
 		middlewares.HandleError(ctx, err, response.BadRequest)
 		return

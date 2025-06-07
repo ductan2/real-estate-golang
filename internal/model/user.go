@@ -17,12 +17,25 @@ type User struct {
 	Role           enum.Role `json:"role" gorm:"type:varchar(20);not null;default:'user'"`
 	UserLoginTime  time.Time `json:"-" gorm:"default:null"`
 	UserLoginIP    string    `json:"-" gorm:"default:null"`
+
 	UserLogoutTime time.Time `json:"-" gorm:"default:null"`
 	UserSalt       string    `json:"-" gorm:"default:null"` // user_salt is the salt that will be used to hash the password
 	Verified       bool      `json:"verified" gorm:"default:false"`
 	VerifiedAt     time.Time `json:"-" gorm:"default:null"`
 	UserInfo       *UserInfo `json:"user_info" gorm:"foreignKey:UserId"`
 
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type UserSession struct {
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	IpAddress string    `json:"ip_address" gorm:"default:null"`
+	Location  string    `json:"location" gorm:"default:null"`
+	Device    string    `json:"device" gorm:"default:null"`
+	UserAgent string    `json:"user_agent" gorm:"default:null"`
+	UserId    uuid.UUID `json:"user_id" gorm:"type:uuid;not null;constraint:OnDelete:CASCADE"`
+	User      *User     `json:"user" gorm:"foreignKey:UserId"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -73,6 +86,10 @@ func (UserInfo) TableName() string {
 
 func (Seller) TableName() string {
 	return "sellers"
+}
+
+func (UserSession) TableName() string {
+	return "user_sessions"
 }
 
 // AfterCreate is a hook that runs after creating a new user

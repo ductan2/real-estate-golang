@@ -42,7 +42,6 @@ func ErrorHandler() gin.HandlerFunc {
 				e.Send()
 
 				// Log the error details
-				fmt.Printf("[ERROR] %v\n", err.Error())
 			}
 
 			// If no response was sent yet, send a 500 error

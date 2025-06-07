@@ -3,7 +3,6 @@ package initialize
 import (
 	"ecommerce/global"
 	"fmt"
-
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
@@ -21,13 +20,13 @@ func LoadConfig() {
 
 	// configure structur
 	if err := viper.Unmarshal(&global.Config); err != nil {
-		fmt.Printf("Unable to decode configuration %v", err)
+		global.Logger.Errorf("Unable to decode configuration %v", err)
 	}
 }
 
 func InitEnv() {
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Println("No .env file found or error loading .env file")
+		global.Logger.Errorf("No .env file found or error loading .env file")
 	}
 }

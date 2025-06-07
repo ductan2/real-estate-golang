@@ -17,7 +17,6 @@ func InitDB() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		db.Host, db.Port, db.Username, db.Password, db.Dbname)
 
-
 	// Create GORM config with logging
 	gormConfig := &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
@@ -26,13 +25,15 @@ func InitDB() (*gorm.DB, error) {
 	// Open database with GORM and PostgreSQL
 	gormDB, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database: %w", err)
+		global.Logger.Errorf("failed to open database: %v", err)
+		return nil, err
 	}
 
 	// Get the underlying *sql.DB
 	sqlDB, err := gormDB.DB()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get database instance: %w", err)
+		global.Logger.Errorf("failed to get database instance: %v", err)
+		return nil, err
 	}
 
 	// Set default connection pool settings
@@ -42,14 +43,16 @@ func InitDB() (*gorm.DB, error) {
 
 	// Test the connection
 	if err := sqlDB.Ping(); err != nil {
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		global.Logger.Errorf("failed to ping database: %v", err)
+		return nil, err
 	}
 
 	// Auto migrate models
 	if err := AutoMigrate(gormDB); err != nil {
-		return nil, fmt.Errorf("failed to migrate models: %w", err)
+		global.Logger.Errorf("failed to migrate models: %v", err)
+		return nil, err
 	}
-	fmt.Println("Database migrated successfully")
+	global.Logger.Infof("Database migrated successfully")
 
 	global.DB = gormDB
 	return gormDB, nil

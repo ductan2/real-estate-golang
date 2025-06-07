@@ -24,7 +24,7 @@ type IUserService interface {
 	Register(username string, email string, password string, ip string, purpose *string) error
 	SendOtp(email string) error
 	VerifyOtp(email string, otp int) error
-	Login(email string, password string, ip string) (string, error)
+	Login(email string, password string, user_session vo.UserSession) (string, error)
 	GetUserInfo(userId string) *model.User
 	GetUserByEmail(email string) (*model.User, error)
 	Logout(userId string) error
@@ -33,7 +33,8 @@ type IUserService interface {
 }
 
 type userService struct {
-	userRepo repo.IUserRepository
+	userRepo        repo.IUserRepository
+	userSessionRepo repo.IUserSessionRepository
 }
 
 // GetUserByEmail implements IUserService.
@@ -57,7 +58,7 @@ func (s *userService) Logout(userId string) error {
 }
 
 // Login implements IUserService.
-func (s *userService) Login(email string, password string, ip string) (string, error) {
+func (s *userService) Login(email string, password string, user_session vo.UserSession) (string, error) {
 	user, err := s.userRepo.GetUserByEmail(email)
 	if err != nil {
 		return "", err
@@ -69,7 +70,7 @@ func (s *userService) Login(email string, password string, ip string) (string, e
 	if !crypto.VerifyPassword(password, user.Password, user.UserSalt) {
 		return "", errors.New("password is incorrect")
 	}
-	err = s.userRepo.UpdateUserLogin(email, ip)
+	err = s.userRepo.UpdateUserLogin(email, user_session.IpAddress)
 	if err != nil {
 		return "", err
 	}
@@ -81,6 +82,11 @@ func (s *userService) Login(email string, password string, ip string) (string, e
 	if err != nil {
 		return "", err
 	}
+	err = s.userSessionRepo.CreateUserSession(user.ID, user_session.IpAddress, user_session.Location, user_session.Device, user_session.UserAgent)
+	if err != nil {
+		return "", err
+	}
+
 	return token, nil
 }
 
@@ -146,6 +152,6 @@ func (s *userService) UpdateUserAvatar(userId string, avatarUrl string) error {
 	return s.userRepo.UpdateUserAvatar(userId, avatarUrl)
 }
 
-func NewUserService(userRepo repo.IUserRepository) IUserService {
-	return &userService{userRepo: userRepo}
+func NewUserService(userRepo repo.IUserRepository, userSessionRepo repo.IUserSessionRepository) IUserService {
+	return &userService{userRepo: userRepo, userSessionRepo: userSessionRepo}
 }

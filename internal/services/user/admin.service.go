@@ -4,7 +4,6 @@ import (
 	"ecommerce/global"
 	repo "ecommerce/internal/repositories/user"
 	mail "ecommerce/internal/utils/email"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -35,25 +34,21 @@ func (s *adminService) BlockSeller(userId string, sellerId string, reason string
 
 // ApproveSellerRequest implements IAdminService.
 func (s *adminService) ApproveSellerRequest(userId string, sellerId, sellerEmail string, approved bool) error {
-	fmt.Println("userId", userId)
-	fmt.Println("sellerId", sellerId)
-	fmt.Println("sellerEmail", sellerEmail)
-	fmt.Println("approved", approved)
 	id, err := uuid.Parse(userId)
 	if err != nil {
 		return err
 	}
-	fmt.Println("sellerId", sellerId)
 	err = s.adminRepo.ApproveSellerRequest(id, sellerId, approved)
 	if err != nil {
 		return err
 	}
-	fmt.Println("approved", approved)
 
 	if approved {
-		go func (){
-			mail.SendEmail([]string{sellerEmail}, global.Config.SMTP.Username, "Your account has been approved", "Your account has been approved")
-		}()
+		go func(email string) {
+			if err := mail.SendEmail([]string{email}, global.Config.SMTP.Username, "Your account has been approved", "Your account has been approved"); err != nil {
+				global.Logger.Errorf("Failed to send approval email to %s: %v", email, err)
+			}
+		}(sellerEmail)
 	}
 	return nil
 }
