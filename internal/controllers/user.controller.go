@@ -90,13 +90,13 @@ func (c *UserController) Login(ctx *gin.Context) {
 		middlewares.HandleError(ctx, err, response.UnprocessableEntity)
 		return
 	}
-	uses_session := vo.UserSession{
-		IpAddress: ctx.ClientIP(),
+	userSession := vo.UserSession{
+ 		IpAddress: ctx.ClientIP(),
 		Location:  auth.GetLocationFromIP(ctx.ClientIP()),
 		Device:    auth.GetUserAgentDetails(ctx.Request.Header.Get("User-Agent")).Platform(),
-		UserAgent: ctx.Request.Header.Get("User-Agent"),
-	}
-	token, err := c.userService.Login(params.Email, params.Password, uses_session)
+ 		UserAgent: ctx.Request.Header.Get("User-Agent"),
+ 	}
+	token, err := c.userService.Login(params.Email, params.Password, userSession)
 	if err != nil {
 		middlewares.HandleError(ctx, err, response.BadRequest)
 		return
