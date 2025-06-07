@@ -15,6 +15,7 @@ type Repositories struct {
 	Project  projectRepo.IProjectRepository
 	Listing  listingRepo.IListingRepository
 	Investor investorRepo.IInvestorRepository
+	UserSession userRepo.IUserSessionRepository
 }
 
 func NewRepositories() *Repositories {
@@ -25,5 +26,6 @@ func NewRepositories() *Repositories {
 		Project:  projectRepo.NewProjectRepository(global.DB),
 		Listing:  listingRepo.NewListingRepository(global.DB),
 		Investor: investorRepo.NewInvestorRepository(global.DB),
+		UserSession: userRepo.NewUserSessionRepository(global.DB),
 	}
 }

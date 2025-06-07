@@ -45,3 +45,10 @@ type UserUpdatePasswordRequest struct {
 type UserUpdateEmailRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
+
+type UserSession struct {
+	IpAddress string `json:"ip_address"`
+	Location  string `json:"location"`
+	Device    string `json:"device"`
+	UserAgent string `json:"user_agent"`
+}

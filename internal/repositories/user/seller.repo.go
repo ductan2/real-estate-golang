@@ -3,7 +3,6 @@ package repo
 import (
 	"ecommerce/internal/model"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -31,7 +30,6 @@ func (s *sellerRepository) GetSellerById(sellerId string) (*model.Seller, error)
 	var seller model.Seller
 	err := s.db.Preload("User").First(&seller, "id = ?", sellerId).Error
 	if err != nil {
-		fmt.Println("err", err)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
 		}

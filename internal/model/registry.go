@@ -13,5 +13,6 @@ func AllModels() []interface{} {
 		&LoanSupport{},
 		&ProjectManager{},
 		&Investor{},
+		&UserSession{},
 	}
 }

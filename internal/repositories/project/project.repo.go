@@ -4,7 +4,6 @@ import (
 	"ecommerce/internal/filters"
 	"ecommerce/internal/model"
 	"errors"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -72,7 +71,6 @@ func (s *projectRepository) GetAllProjects(page int, limit int, filter *filters.
 	// Get total count
 	err := query.Count(&total).Error
 	if err != nil {
-		fmt.Println("Error getting total count:", err)
 		return nil, 0, err
 	}
 
@@ -83,7 +81,6 @@ func (s *projectRepository) GetAllProjects(page int, limit int, filter *filters.
 		Order("created_at DESC").
 		Find(&projects).Error
 	if err != nil {
-		fmt.Println("Error getting paginated results:", err)
 		return nil, 0, err
 	}
 

@@ -10,14 +10,16 @@ import (
 
 func InitUserRouterHanlder() (*controllers.UserController, error) {
 	iUserRepository := repo.NewUserRepository(global.DB)
-	iUserService := services.NewUserService(iUserRepository)
+	iUserSessionRepository := repo.NewUserSessionRepository(global.DB)
+	iUserService := services.NewUserService(iUserRepository, iUserSessionRepository)
 	userController := controllers.NewUserController(iUserService)
 	return userController, nil
 }
 
 func InitUserService() (services.IUserService, error) {
 	iUserRepository := repo.NewUserRepository(global.DB)
-	iUserService := services.NewUserService(iUserRepository)
+	iUserSessionRepository := repo.NewUserSessionRepository(global.DB)
+	iUserService := services.NewUserService(iUserRepository, iUserSessionRepository)
 	return iUserService, nil
 }
 
