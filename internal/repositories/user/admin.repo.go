@@ -14,6 +14,7 @@ type IAdminRepository interface {
 	ApproveSellerRequest(userId uuid.UUID, sellerId string, approved bool) error
 	BlockSeller(userId uuid.UUID, sellerId string, reason string) error
 	CheckAdmin(userId uuid.UUID) (bool, error)
+	GetAllAdmins() ([]*model.User, error)
 }
 
 type adminRepository struct {
@@ -53,4 +54,13 @@ func (a *adminRepository) CheckAdmin(userId uuid.UUID) (bool, error) {
 		return false, err
 	}
 	return user.Role == enum.UserRole.Admin, nil
+}
+
+func (a *adminRepository) GetAllAdmins() ([]*model.User, error) {
+	var users []*model.User
+	err := a.db.Where("role = ?", enum.UserRole.Admin).Find(&users).Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }

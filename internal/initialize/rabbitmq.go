@@ -16,10 +16,17 @@ func InitRabbitMQ() {
 		global.Config.RabbitMQ.Port,
 	)
 	fmt.Println(rabbitmqUrl)
-	queueService, err := queue.NewQueueService(rabbitmqUrl, global.Config.RabbitMQ.QueueName,"seller_approval_exchange")
+	queueService, err := queue.NewQueueService(rabbitmqUrl)
 	if err != nil {
 		log.Fatalf("Failed to connect to RabbitMQ: %v", err)
 	}
 
 	global.RabbitMQ = queueService
+
+	// ensure default notification queue and exchange exist
+	if q, ok := global.Config.RabbitMQ.Queues["notification"]; ok {
+		if err := queueService.CreateQueueAndBind("seller_approval_exchange", q, "seller.approved"); err != nil {
+			log.Fatalf("Failed to declare queue: %v", err)
+		}
+	}
 }

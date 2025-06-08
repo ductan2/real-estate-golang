@@ -73,9 +73,9 @@ type Logger struct {
 }
 
 type RabbitMQ struct {
-	Host      string `mapstructure:"host"`
-	Port      int    `mapstructure:"port"`
-	Username  string `mapstructure:"username"`
-	Password  string `mapstructure:"password"`
-	QueueName string `mapstructure:"queue_name"`
+	Host     string            `mapstructure:"host"`
+	Port     int               `mapstructure:"port"`
+	Username string            `mapstructure:"username"`
+	Password string            `mapstructure:"password"`
+	Queues   map[string]string `mapstructure:"queues"`
 }

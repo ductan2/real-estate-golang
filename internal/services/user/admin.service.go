@@ -49,6 +49,14 @@ func (s *adminService) ApproveSellerRequest(userId string, sellerId, sellerEmail
 				global.Logger.Errorf("Failed to send approval email to %s: %v", email, err)
 			}
 		}(sellerEmail)
+
+		// publish notification message to RabbitMQ
+		go func() {
+			msg := map[string]string{"message": "A seller has been approved"}
+			if err := global.RabbitMQ.PublishMessage(msg, "seller_approval_exchange", "seller.approved"); err != nil {
+				global.Logger.Errorf("Failed to publish notification: %v", err)
+			}
+		}()
 	}
 	return nil
 }
