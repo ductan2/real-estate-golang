@@ -8,7 +8,7 @@ import (
 )
 
 type IUserSessionRepository interface {
-	CreateUserSession(userId uuid.UUID, ipAddress string, location string, device string, browser string, userAgent string) error
+	CreateUserSession(userId uuid.UUID, ipAddress string, location string, device string, userAgent string) error
 	GetUserSessionByUserId(userId uuid.UUID) (*model.UserSession, error)
 	DeleteUserSession(userId uuid.UUID) error
 }
@@ -21,13 +21,12 @@ func NewUserSessionRepository(db *gorm.DB) IUserSessionRepository {
 	return &userSessionRepository{db: db}
 }
 
-func (u *userSessionRepository) CreateUserSession(userId uuid.UUID, ipAddress string, location string, device string, browser string, userAgent string) error {
+func (u *userSessionRepository) CreateUserSession(userId uuid.UUID, ipAddress string, location string, device string, userAgent string) error {
 	return u.db.Create(&model.UserSession{
 		UserId:    userId,
 		IpAddress: ipAddress,
 		Location:  location,
 		Device:    device,
-		Browser:   browser,
 		UserAgent: userAgent,
 	}).Error
 }

@@ -15,10 +15,10 @@ func GetLocationFromIP(ip string) string {
 	if net.ParseIP(ip) == nil {
 		return ""
 	}
-
-	url := fmt.Sprintf("https://ip-api.com/json/%s", ip)
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Get(url)
+    
+    url := fmt.Sprintf("https://ip-api.com/json/%s", ip)
+    client := &http.Client{Timeout: 10 * time.Second}
+    resp, err := client.Get(url)
 	if err != nil {
 		return ""
 	}

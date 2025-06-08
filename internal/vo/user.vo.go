@@ -1,14 +1,15 @@
 package vo
 
+
 type UserLoginRequest struct {
-	Email    string `json:"email" binding:"required,email"`
+	Email   string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"`
 }
 
 type UserRegisterRequest struct {
-	Username string  `json:"username" binding:"required,min=1"`
-	Email    string  `json:"email" binding:"required,email"`
-	Password string  `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required,min=1"`
+	Email   string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
 	Purpose  *string `json:"purpose"` // TEST_USER, TRADER, ADMIN, etc.
 }
 
@@ -49,6 +50,5 @@ type UserSession struct {
 	IpAddress string `json:"ip_address"`
 	Location  string `json:"location"`
 	Device    string `json:"device"`
-	Browser   string `json:"browser"`
 	UserAgent string `json:"user_agent"`
 }

@@ -10,13 +10,13 @@ import (
 )
 
 type User struct {
-	ID            uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	Username      string    `json:"username" gorm:"uniqueIndex;not null"`
-	Email         string    `json:"email" gorm:"uniqueIndex;not null"`
-	Password      string    `json:"-" gorm:"not null"` // "-" means this field won't be included in JSON
-	Role          enum.Role `json:"role" gorm:"type:varchar(20);not null;default:'user'"`
-	UserLoginTime time.Time `json:"-" gorm:"default:null"`
-	UserLoginIP   string    `json:"-" gorm:"default:null"`
+	ID             uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Username       string    `json:"username" gorm:"uniqueIndex;not null"`
+	Email          string    `json:"email" gorm:"uniqueIndex;not null"`
+	Password       string    `json:"-" gorm:"not null"` // "-" means this field won't be included in JSON
+	Role           enum.Role `json:"role" gorm:"type:varchar(20);not null;default:'user'"`
+	UserLoginTime  time.Time `json:"-" gorm:"default:null"`
+	UserLoginIP    string    `json:"-" gorm:"default:null"`
 
 	UserLogoutTime time.Time `json:"-" gorm:"default:null"`
 	UserSalt       string    `json:"-" gorm:"default:null"` // user_salt is the salt that will be used to hash the password
@@ -33,7 +33,6 @@ type UserSession struct {
 	IpAddress string    `json:"ip_address" gorm:"default:null"`
 	Location  string    `json:"location" gorm:"default:null"`
 	Device    string    `json:"device" gorm:"default:null"`
-	Browser   string    `json:"browser" gorm:"default:null"`
 	UserAgent string    `json:"user_agent" gorm:"default:null"`
 	UserId    uuid.UUID `json:"user_id" gorm:"type:uuid;not null;constraint:OnDelete:CASCADE"`
 	User      *User     `json:"user" gorm:"foreignKey:UserId"`
@@ -72,8 +71,8 @@ type Seller struct {
 	BlockedByUser *User      `json:"blocked_by_user" gorm:"foreignKey:BlockedBy"`
 	BlockedReason *string    `json:"blocked_reason" gorm:"default:null"`
 	User          *User      `json:"user" gorm:"foreignKey:UserId"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // TableName specifies the table name for the User model
