@@ -82,7 +82,7 @@ func (s *userService) Login(email string, password string, user_session vo.UserS
 	if err != nil {
 		return "", err
 	}
-	err = s.userSessionRepo.CreateUserSession(user.ID, user_session.IpAddress, user_session.Location, user_session.Device, user_session.UserAgent)
+	err = s.userSessionRepo.CreateUserSession(user.ID, user_session.IpAddress, user_session.Location, user_session.Device, user_session.Browser, user_session.UserAgent)
 	if err != nil {
 		return "", err
 	}
