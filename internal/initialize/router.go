@@ -5,6 +5,7 @@ import (
 	"ecommerce/internal/routers"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.elastic.co/apm"
 	"go.elastic.co/apm/module/apmgin"
 )
@@ -16,6 +17,10 @@ func InitRouter(r *gin.Engine) {
 	// Add middlewares
 	r.Use(middlewares.Logger())
 	r.Use(apmMiddleware)
+	r.Use(middlewares.Prometheus())
+
+	// expose metrics endpoint
+	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	mainRouter := routers.RouterGroupApp
 	MainGroup := r.Group("/api/v1")
